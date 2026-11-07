@@ -79,3 +79,11 @@ fn nested_blocks_inherit() {
     assert_eq!(env.render_template("page.njk", json!({})).unwrap(), "<f>PBASE+L</f>");
     assert_eq!(env.render_template("own.njk", json!({})).unwrap(), "WBASE+L!");
 }
+
+/// `select` / `reject` without a test name test truthiness, as Nunjucks does.
+#[test]
+fn select_without_a_test_keeps_truthy_items() {
+    assert_eq!(render("{{ [1, 0, '', 'a', none, false] | select | join(',') }}", json!({})), "1,a");
+    assert_eq!(render("{{ [1, 0, 'a', false] | reject | length }}", json!({})), "2");
+    assert_eq!(render("{{ [1, 2, 3] | select('odd') | join(',') }}", json!({})), "1,3");
+}

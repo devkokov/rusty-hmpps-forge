@@ -710,12 +710,14 @@ fn is_truthy_filter(v: &Value) -> bool {
 }
 
 fn filter_select(env: &Environment, input: &Value, args: &[Value]) -> Result<Value> {
-    let test_name = args
-        .first()
-        .map(value_to_string)
-        .filter(|s| !s.is_empty())
-        .ok_or_else(|| RunjucksError::new("`select` filter expects a test name"))?;
-    let test_args = &args[1..];
+    // Nunjucks: without a test name, `select` / `reject` test truthiness (`| select | list`
+    // drops falsy items).
+    let test_name = match args.first() {
+        None | Some(Value::Null) => "truthy".to_string(),
+        Some(v) if is_undefined_value(v) => "truthy".to_string(),
+        Some(v) => value_to_string(v),
+    };
+    let test_args = args.get(1..).unwrap_or_default();
     let Value::Array(items) = input else {
         return Ok(Value::Array(vec![]));
     };
@@ -729,12 +731,14 @@ fn filter_select(env: &Environment, input: &Value, args: &[Value]) -> Result<Val
 }
 
 fn filter_reject(env: &Environment, input: &Value, args: &[Value]) -> Result<Value> {
-    let test_name = args
-        .first()
-        .map(value_to_string)
-        .filter(|s| !s.is_empty())
-        .ok_or_else(|| RunjucksError::new("`reject` filter expects a test name"))?;
-    let test_args = &args[1..];
+    // Nunjucks: without a test name, `select` / `reject` test truthiness (`| select | list`
+    // drops falsy items).
+    let test_name = match args.first() {
+        None | Some(Value::Null) => "truthy".to_string(),
+        Some(v) if is_undefined_value(v) => "truthy".to_string(),
+        Some(v) => value_to_string(v),
+    };
+    let test_args = args.get(1..).unwrap_or_default();
     let Value::Array(items) = input else {
         return Ok(Value::Array(vec![]));
     };
