@@ -2,7 +2,7 @@
 # traces through. Driven by the Makefile (`make up`); runnable directly with
 #   docker compose up --build
 
-name: hmpps-forge-examples-app-rust
+name: rusty-hmpps-forge-examples-app
 
 services:
   redis:
@@ -13,7 +13,7 @@ services:
       retries: 20
 
   ui:
-    image: ghcr.io/ministryofjustice/hmpps-forge-examples-app-rust:${APP_VERSION:-local}
+    image: ghcr.io/devkokov/rusty-hmpps-forge-developer-guide:latest
     build:
       context: .
       dockerfile: Dockerfile
