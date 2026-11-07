@@ -1,5 +1,5 @@
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/Cargo.toml runjucks_core/Cargo.toml
---- runjucks_core-0.1.9/Cargo.toml	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/Cargo.toml	2026-11-07 01:46:15
 +++ runjucks_core/Cargo.toml	2026-11-04 13:18:06
 @@ -224,3 +224,5 @@
      "rt",
@@ -8,7 +8,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
 +
 +[workspace]
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/ast.rs runjucks_core/src/ast.rs
---- runjucks_core-0.1.9/src/ast.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/ast.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/ast.rs	2026-11-06 16:47:13
 @@ -28,6 +28,10 @@
      pub name: String,
@@ -22,7 +22,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
  
  /// Loop binding list after `for` (`x` or `k, v` or `a, b, c`).
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/async_renderer/entry.rs runjucks_core/src/async_renderer/entry.rs
---- runjucks_core-0.1.9/src/async_renderer/entry.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/async_renderer/entry.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/async_renderer/entry.rs	2026-11-04 14:54:06
 @@ -28,7 +28,10 @@
      root: &Node,
@@ -37,7 +37,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
              &super::eval::eval_to_value_async(env, state, &parent_expr, ctx_stack).await?,
          );
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/async_renderer/macros.rs runjucks_core/src/async_renderer/macros.rs
---- runjucks_core-0.1.9/src/async_renderer/macros.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/async_renderer/macros.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/async_renderer/macros.rs	2026-11-04 14:54:06
 @@ -113,12 +113,25 @@
          ctx_stack,
@@ -69,7 +69,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
  
  #[allow(clippy::too_many_arguments)]
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/environment.rs runjucks_core/src/environment.rs
---- runjucks_core-0.1.9/src/environment.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/environment.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/environment.rs	2026-11-06 16:44:14
 @@ -282,21 +282,18 @@
      }
@@ -101,9 +101,51 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
  
  impl Default for Environment {
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/filters.rs runjucks_core/src/filters.rs
---- runjucks_core-0.1.9/src/filters.rs	2026-11-06 22:42:02
-+++ runjucks_core/src/filters.rs	2026-11-04 13:15:27
-@@ -958,13 +958,14 @@
+--- runjucks_core-0.1.9/src/filters.rs	2026-11-07 01:46:15
++++ runjucks_core/src/filters.rs	2026-11-07 01:45:53
+@@ -710,12 +710,14 @@
+ }
+ 
+ fn filter_select(env: &Environment, input: &Value, args: &[Value]) -> Result<Value> {
+-    let test_name = args
+-        .first()
+-        .map(value_to_string)
+-        .filter(|s| !s.is_empty())
+-        .ok_or_else(|| RunjucksError::new("`select` filter expects a test name"))?;
+-    let test_args = &args[1..];
++    // Nunjucks: without a test name, `select` / `reject` test truthiness (`| select | list`
++    // drops falsy items).
++    let test_name = match args.first() {
++        None | Some(Value::Null) => "truthy".to_string(),
++        Some(v) if is_undefined_value(v) => "truthy".to_string(),
++        Some(v) => value_to_string(v),
++    };
++    let test_args = args.get(1..).unwrap_or_default();
+     let Value::Array(items) = input else {
+         return Ok(Value::Array(vec![]));
+     };
+@@ -729,12 +731,14 @@
+ }
+ 
+ fn filter_reject(env: &Environment, input: &Value, args: &[Value]) -> Result<Value> {
+-    let test_name = args
+-        .first()
+-        .map(value_to_string)
+-        .filter(|s| !s.is_empty())
+-        .ok_or_else(|| RunjucksError::new("`reject` filter expects a test name"))?;
+-    let test_args = &args[1..];
++    // Nunjucks: without a test name, `select` / `reject` test truthiness (`| select | list`
++    // drops falsy items).
++    let test_name = match args.first() {
++        None | Some(Value::Null) => "truthy".to_string(),
++        Some(v) if is_undefined_value(v) => "truthy".to_string(),
++        Some(v) => value_to_string(v),
++    };
++    let test_args = args.get(1..).unwrap_or_default();
+     let Value::Array(items) = input else {
+         return Ok(Value::Array(vec![]));
+     };
+@@ -958,13 +962,14 @@
          return f(input, args);
      }
      match name {
@@ -121,7 +163,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
              _ => Ok(json!(0)),
          },
          "join" => {
-@@ -1037,13 +1038,13 @@
+@@ -1037,13 +1042,13 @@
          "first" => Ok(filter_first(input)),
          "last" => Ok(filter_last(input)),
          "reverse" => Ok(filter_reverse(input)),
@@ -139,7 +181,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
          "striptags" => Ok(filter_striptags(input, args)),
          "urlencode" => Ok(filter_urlencode(input, args)),
          "string" => Ok(filter_string(input)),
-@@ -1051,7 +1052,7 @@
+@@ -1051,7 +1056,7 @@
          "int" => Ok(filter_int(input, args)),
          "sort" => filter_sort(input, args),
          "dictsort" => filter_dictsort(input, args),
@@ -148,7 +190,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
          "dump" => Ok(filter_dump(input, args)),
          "list" => filter_list(input),
          "slice" => filter_slice_(input, args),
-@@ -1073,7 +1074,15 @@
+@@ -1073,7 +1078,15 @@
                  },
              )
          }
@@ -274,7 +316,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
 +    (start, end.max(start))
 +}
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/lexer.rs runjucks_core/src/lexer.rs
---- runjucks_core-0.1.9/src/lexer.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/lexer.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/lexer.rs	2026-11-04 13:17:50
 @@ -56,7 +56,7 @@
  
@@ -358,7 +400,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
                      if trim_open {
                          text = text.trim_end().to_string();
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/lib.rs runjucks_core/src/lib.rs
---- runjucks_core-0.1.9/src/lib.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/lib.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/lib.rs	2026-11-04 13:11:12
 @@ -31,6 +31,7 @@
  pub mod filters;
@@ -369,7 +411,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
  pub mod loader;
  pub mod parser;
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/parser/expr.rs runjucks_core/src/parser/expr.rs
---- runjucks_core-0.1.9/src/parser/expr.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/parser/expr.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/parser/expr.rs	2026-11-06 16:48:20
 @@ -488,6 +488,11 @@
      let mut pairs = Vec::new();
@@ -416,7 +458,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
              acc = Expr::Binary {
                  op: BinOp::And,
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/parser/template.rs runjucks_core/src/parser/template.rs
---- runjucks_core-0.1.9/src/parser/template.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/parser/template.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/parser/template.rs	2026-11-06 16:47:13
 @@ -887,7 +887,7 @@
      *i += 1;
@@ -428,7 +470,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
  
  /// `{% raw %}…{% endraw %}` / `{% verbatim %}…{% endverbatim %}` — lexer emits literal [`Token::Text`]
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/render_common.rs runjucks_core/src/render_common.rs
---- runjucks_core-0.1.9/src/render_common.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/render_common.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/render_common.rs	2026-11-04 14:54:06
 @@ -19,7 +19,9 @@
  use ahash::AHashMap;
@@ -497,7 +539,7 @@ diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_
      }
  }
 diff --color -ruN -x target -x Cargo.toml.orig -x .cargo_vcs_info.json runjucks_core-0.1.9/src/renderer.rs runjucks_core/src/renderer.rs
---- runjucks_core-0.1.9/src/renderer.rs	2026-11-06 22:42:02
+--- runjucks_core-0.1.9/src/renderer.rs	2026-11-07 01:46:15
 +++ runjucks_core/src/renderer.rs	2026-11-06 22:41:50
 @@ -30,6 +30,9 @@
  #[derive(Debug, Clone)]
