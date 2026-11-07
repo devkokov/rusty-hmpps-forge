@@ -13,8 +13,8 @@ and `forge-moj-components/` holds Forge's MOJ component `templates/` and `styles
 
 ```sh
 make install                         # npm ci in examples-app (frontend packages, needed by the app and the tests)
-cargo run -p forge-examples-app      # http://localhost:3000/forge-developer-guide (HOST/PORT as Topcoat reads them)
-TZ=UTC cargo test --workspace
+make cargo-run                       # compiles and runs the examples app outside of Docker - http://localhost:3000/forge-developer-guide (HOST/PORT as Topcoat reads them)
+make test                            # runs workspace tests
 make up                              # Docker: build the image and start the app with Redis
 ```
 

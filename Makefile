@@ -23,6 +23,12 @@ help: ## The help text you're reading.
 install: ## Installs the frontend packages into examples-app/node_modules (for cargo run / cargo test).
 	@cd examples-app && npm ci --ignore-scripts --no-audit --no-fund
 
+cargo-run: ## Compiles and runs the examples app (Dev Guide) outside of Docker
+	cargo run -p forge-examples-app
+
+test: ## Runs all tests in the workspace
+	TZ=UTC cargo test --workspace
+
 build: ## Builds the app image (release build of the Rust app).
 	@$(COMPOSE) build $(SERVICE_NAME)
 
