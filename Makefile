@@ -6,13 +6,12 @@ SHELL = /bin/bash
 COMPOSE = docker compose -f docker-compose.yml
 SERVICE_NAME = ui
 
-APP_VERSION ?= local
 APP_PORT ?= 3000
 BUILD_NUMBER ?= $(shell date +%Y-%m-%d.%H%M)
 GIT_REF ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
 
-export APP_VERSION APP_PORT BUILD_NUMBER GIT_REF GIT_BRANCH
+export APP_PORT BUILD_NUMBER GIT_REF GIT_BRANCH
 
 .DEFAULT_GOAL := help
 .PHONY: help install build up start down restart logs ps health clean
@@ -56,4 +55,7 @@ health: ## Checks the running app's health endpoint.
 
 clean: ## Stops the services and removes the containers, volumes and the app image.
 	@$(COMPOSE) down --volumes --rmi local
-	@docker image rm ghcr.io/ministryofjustice/hmpps-forge-examples-app-rust:$(APP_VERSION) 2>/dev/null || true
+	@docker image rm ghcr.io/devkokov/rusty-hmpps-forge-developer-guide:latest 2>/dev/null || true
+
+update: ## Download the latest images
+	@$(COMPOSE) pull
