@@ -10,6 +10,7 @@ mod first_journey {
     use forge_core::authoring::*;
     use forge_core::{Value, obj};
     use forge_govuk_components::blocks as govuk;
+    use forge_govuk_components::props::ButtonProps;
 
     fn name_step() -> Value {
         step(obj! {
@@ -25,7 +26,7 @@ mod first_journey {
                         "classes": "govuk-label--l",
                     },
                 }),
-                govuk::BUTTON.build(obj! { "text": "Continue" }),
+                govuk::BUTTON.build(ButtonProps::action().text("Continue")),
             ],
             "onSubmission": [submit(obj! {
                 "validate": true,
@@ -50,7 +51,7 @@ mod first_journey {
                     },
                     "hint": obj! { "text": "Tell us what you think of this service." },
                 }),
-                govuk::BUTTON.build(obj! { "text": "Send feedback" }),
+                govuk::BUTTON.build(ButtonProps::action().text("Send feedback")),
             ],
             "onSubmission": [submit(obj! {
                 "validate": true,
@@ -91,13 +92,26 @@ mod first_journey {
 #[tokio::test]
 async fn first_journey_runs() {
     let mut harness = ForgeTestHarness::new(ForgeOptions::default());
-    harness.register_global_components(forge_govuk_components::components()).unwrap();
-    harness.register_package(first_journey::package::package()).unwrap();
+    harness
+        .register_global_components(forge_govuk_components::components())
+        .unwrap();
+    harness
+        .register_package(first_journey::package::package())
+        .unwrap();
     let client = harness.create_client(None);
 
-    let page = client.get("/feedback", TestRequestOptions::default()).await.unwrap();
+    let page = client
+        .get("/feedback", TestRequestOptions::default())
+        .await
+        .unwrap();
     assert!(page.context().is_some(), "the name page renders");
-    let next = client.post("/feedback", TestRequestOptions::body(obj! { "fullName": "Ada" })).await.unwrap();
+    let next = client
+        .post(
+            "/feedback",
+            TestRequestOptions::body(obj! { "fullName": "Ada" }),
+        )
+        .await
+        .unwrap();
     assert_eq!(next.redirect_url(), Some("/feedback/your-feedback"));
 }
 
@@ -114,9 +128,15 @@ fn adapter_setup_builds_a_router() {
 
     // Forge
     let mut forge = Forge::new(ForgeOptions::default());
-    forge.register_global_components(forge_govuk_components::components()).expect("GOV.UK components");
-    forge.register_global_components(forge_moj_components::components()).expect("MOJ components");
-    forge.register_package(first_journey::package::package()).expect("feedback journey");
+    forge
+        .register_global_components(forge_govuk_components::components())
+        .expect("GOV.UK components");
+    forge
+        .register_global_components(forge_moj_components::components())
+        .expect("MOJ components");
+    forge
+        .register_package(first_journey::package::package())
+        .expect("feedback journey");
 
     // Template engine
     let engine = RunjucksEngine::new([
@@ -129,9 +149,19 @@ fn adapter_setup_builds_a_router() {
     renderer.default_template = "partials/form-step".into();
 
     // Routes
-    let options = AdapterOptions { csrf: true, state: obj! { "serviceName": "My service" }, ..AdapterOptions::default() };
+    let options = AdapterOptions {
+        csrf: true,
+        state: obj! { "serviceName": "My service" },
+        ..AdapterOptions::default()
+    };
     // The first step's path "/" shares the journey's URL: the step is served.
-    let _router = mount(Router::builder(), Arc::new(forge), Arc::new(renderer), options).build();
+    let _router = mount(
+        Router::builder(),
+        Arc::new(forge),
+        Arc::new(renderer),
+        options,
+    )
+    .build();
 }
 
 /// `get-started/why-use-forge`: the add-trip step (built, not registered: its effects are the
@@ -140,6 +170,7 @@ fn adapter_setup_builds_a_router() {
 fn why_use_forge_step_builds() {
     use forge_core::authoring::*;
     use forge_govuk_components::blocks as govuk;
+    use forge_govuk_components::props::ButtonProps;
     use forge_govuk_components::validations;
 
     let add_trip_step = step(obj! {
@@ -187,7 +218,7 @@ fn why_use_forge_step_builds() {
                     }),
                 ]),
             }),
-            govuk::BUTTON.build(obj! { "text": "Save and continue" }),
+            govuk::BUTTON.build(ButtonProps::action().text("Save and continue")),
         ],
         "onAccess": [access(obj! {
             "effects": [effect::call("LoadCountries", vec![])],
@@ -200,7 +231,10 @@ fn why_use_forge_step_builds() {
             },
         })],
     });
-    assert_eq!(add_trip_step.get("type").as_str(), Some("StructureType.Step"));
+    assert_eq!(
+        add_trip_step.get("type").as_str(),
+        Some("StructureType.Step")
+    );
 }
 
 /// `building-journeys/testing`: the harness snippets, against a small journey whose
@@ -249,13 +283,16 @@ mod testing_page {
     }
 
     fn my_functions(api: Arc<dyn RecordApi>) -> Vec<FunctionEntry> {
-        vec![FunctionEntry::effect("SaveRecord", move |context, _args| {
-            let api = api.clone();
-            async move {
-                api.save_record(Value::object(context.get_all_answers()));
-                Ok(())
-            }
-        })]
+        vec![FunctionEntry::effect(
+            "SaveRecord",
+            move |context, _args| {
+                let api = api.clone();
+                async move {
+                    api.save_record(Value::object(context.get_all_answers()));
+                    Ok(())
+                }
+            },
+        )]
     }
 
     fn my_package(api: Arc<dyn RecordApi>) -> ForgePackage {
@@ -282,13 +319,24 @@ mod testing_page {
         let client = harness.create_client(None);
 
         client
-            .post("/my-journey/step-one", TestRequestOptions::body(obj! { "firstName": "Sam" }))
+            .post(
+                "/my-journey/step-one",
+                TestRequestOptions::body(obj! { "firstName": "Sam" }),
+            )
             .await?;
 
-        assert_eq!(api.0.lock().unwrap()[0].get("firstName"), Value::from("Sam"));
+        assert_eq!(
+            api.0.lock().unwrap()[0].get("firstName"),
+            Value::from("Sam")
+        );
 
         // Render results
-        let result = client.get("/my-journey/step-one", TestRequestOptions::session(obj! { "user": "test" })).await?;
+        let result = client
+            .get(
+                "/my-journey/step-one",
+                TestRequestOptions::session(obj! { "user": "test" }),
+            )
+            .await?;
         if let TestResult::Render { context, .. } = &result {
             assert_eq!(context.get("showValidationFailures"), Value::Bool(false));
         } else {
@@ -298,32 +346,59 @@ mod testing_page {
 
         // Redirect results
         let result = client
-            .post("/my-journey/step-one", TestRequestOptions::body(obj! { "firstName": "Sam" }))
+            .post(
+                "/my-journey/step-one",
+                TestRequestOptions::body(obj! { "firstName": "Sam" }),
+            )
             .await?;
-        assert!(result.redirect_url().expect("redirected").contains("step-two"));
+        assert!(
+            result
+                .redirect_url()
+                .expect("redirected")
+                .contains("step-two")
+        );
 
         // Validation errors
-        let result = client.post("/my-journey/step-one", TestRequestOptions::body(obj! {})).await?;
+        let result = client
+            .post("/my-journey/step-one", TestRequestOptions::body(obj! {}))
+            .await?;
         let errors = result.validation_errors_for("firstName");
         assert_eq!(errors.len(), 1);
-        assert_eq!(errors[0].get("message"), Value::from("Enter your first name"));
-        assert_eq!(result.context().expect("rendered").get("showValidationFailures"), Value::Bool(true));
+        assert_eq!(
+            errors[0].get("message"),
+            Value::from("Enter your first name")
+        );
+        assert_eq!(
+            result
+                .context()
+                .expect("rendered")
+                .get("showValidationFailures"),
+            Value::Bool(true)
+        );
 
         // Replacing an effect
         let recorded = Arc::new(Mutex::new(Vec::new()));
         let seen = recorded.clone();
-        let mut functions: Vec<FunctionEntry> =
-            my_functions(api.clone()).into_iter().filter(|f| &*f.name != "SaveRecord").collect();
-        functions.push(FunctionEntry::effect("SaveRecord", move |_context, args| {
-            seen.lock().unwrap().push(args);
-            async { Ok(()) }
-        }));
+        let mut functions: Vec<FunctionEntry> = my_functions(api.clone())
+            .into_iter()
+            .filter(|f| &*f.name != "SaveRecord")
+            .collect();
+        functions.push(FunctionEntry::effect(
+            "SaveRecord",
+            move |_context, args| {
+                seen.lock().unwrap().push(args);
+                async { Ok(()) }
+            },
+        ));
         let mut harness = ForgeTestHarness::new(ForgeOptions::default());
         harness.register_global_components(forge_govuk_components::components())?;
         harness.register_package(ForgePackage::new(my_journey()).with_functions(functions))?;
         let client = harness.create_client(None);
         client
-            .post("/my-journey/step-one", TestRequestOptions::body(obj! { "firstName": "Sam" }))
+            .post(
+                "/my-journey/step-one",
+                TestRequestOptions::body(obj! { "firstName": "Sam" }),
+            )
             .await?;
         assert_eq!(recorded.lock().unwrap().len(), 1);
         Ok(())
@@ -339,7 +414,8 @@ async fn inline_transformer_runs() -> Result<(), Box<dyn std::error::Error>> {
     use forge_govuk_components::blocks as govuk;
 
     let functions = Functions::new();
-    let to_upper = functions.transformer(|value, _args| Ok(Value::from(value.to_js_string().to_uppercase())));
+    let to_upper =
+        functions.transformer(|value, _args| Ok(Value::from(value.to_js_string().to_uppercase())));
     let journey = journey(obj! {
         "code": "inline",
         "path": "/inline",
@@ -355,7 +431,15 @@ async fn inline_transformer_runs() -> Result<(), Box<dyn std::error::Error>> {
     harness.register_global_components(forge_govuk_components::components())?;
     harness.register_package(ForgePackage::new(journey).with_functions(&functions))?;
     let client = harness.create_client(None);
-    let result = client.get("/inline/page", TestRequestOptions { query: obj! { "name": "sam" }, ..TestRequestOptions::default() }).await?;
+    let result = client
+        .get(
+            "/inline/page",
+            TestRequestOptions {
+                query: obj! { "name": "sam" },
+                ..TestRequestOptions::default()
+            },
+        )
+        .await?;
     let body = &result.blocks_by_variant("govukBody")[0];
     assert_eq!(body.get("properties").get("text"), Value::from("SAM"));
     Ok(())
@@ -369,7 +453,8 @@ mod custom_conditions {
     use forge_core::{ForgeError, FunctionEntry, Value};
     use regex::Regex;
 
-    static NI_NUMBER: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)^[A-Z]{2}\d{6}[A-D]$").unwrap());
+    static NI_NUMBER: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"(?i)^[A-Z]{2}\d{6}[A-D]$").unwrap());
 
     pub fn my_conditions() -> Vec<FunctionEntry> {
         vec![
@@ -394,7 +479,9 @@ mod custom_conditions {
             // args[0] - an ISO date string representing the cutoff date.
             FunctionEntry::condition("IsBeforeDeadline", |value, args| {
                 let Some(value) = value.as_str() else {
-                    return Err(ForgeError::type_error("IsBeforeDeadline expects a date string"));
+                    return Err(ForgeError::type_error(
+                        "IsBeforeDeadline expects a date string",
+                    ));
                 };
 
                 // ISO dates (YYYY-MM-DD) sort in date order
@@ -423,7 +510,10 @@ mod custom_conditions {
         use forge_core::{FunctionEntry, Value};
 
         fn condition(name: &str) -> FunctionEntry {
-            my_conditions().into_iter().find(|f| &*f.name == name).unwrap()
+            my_conditions()
+                .into_iter()
+                .find(|f| &*f.name == name)
+                .unwrap()
         }
 
         async fn evaluate(name: &str, args: Vec<Value>) -> forge_core::ForgeResult<Value> {
@@ -436,19 +526,34 @@ mod custom_conditions {
             #[tokio::test]
             async fn should_return_true_when_value_meets_minimum_score() {
                 // Arrange / Act / Assert
-                assert_eq!(evaluate("IsEligible", vec![75.into(), 50.into()]).await.unwrap(), Value::Bool(true));
+                assert_eq!(
+                    evaluate("IsEligible", vec![75.into(), 50.into()])
+                        .await
+                        .unwrap(),
+                    Value::Bool(true)
+                );
             }
 
             #[tokio::test]
             async fn should_return_false_when_value_is_below_minimum_score() {
                 // Arrange / Act / Assert
-                assert_eq!(evaluate("IsEligible", vec![30.into(), 50.into()]).await.unwrap(), Value::Bool(false));
+                assert_eq!(
+                    evaluate("IsEligible", vec![30.into(), 50.into()])
+                        .await
+                        .unwrap(),
+                    Value::Bool(false)
+                );
             }
 
             #[tokio::test]
             async fn should_return_true_when_value_equals_minimum_score() {
                 // Arrange / Act / Assert
-                assert_eq!(evaluate("IsEligible", vec![50.into(), 50.into()]).await.unwrap(), Value::Bool(true));
+                assert_eq!(
+                    evaluate("IsEligible", vec![50.into(), 50.into()])
+                        .await
+                        .unwrap(),
+                    Value::Bool(true)
+                );
             }
 
             #[tokio::test]
@@ -465,19 +570,34 @@ mod custom_conditions {
             #[tokio::test]
             async fn should_return_true_for_a_valid_ni_number() {
                 // Arrange / Act / Assert
-                assert_eq!(evaluate("IsValidNiNumber", vec!["AB123456C".into()]).await.unwrap(), Value::Bool(true));
+                assert_eq!(
+                    evaluate("IsValidNiNumber", vec!["AB123456C".into()])
+                        .await
+                        .unwrap(),
+                    Value::Bool(true)
+                );
             }
 
             #[tokio::test]
             async fn should_return_true_when_spaces_are_present() {
                 // Arrange / Act / Assert
-                assert_eq!(evaluate("IsValidNiNumber", vec!["AB 12 34 56 C".into()]).await.unwrap(), Value::Bool(true));
+                assert_eq!(
+                    evaluate("IsValidNiNumber", vec!["AB 12 34 56 C".into()])
+                        .await
+                        .unwrap(),
+                    Value::Bool(true)
+                );
             }
 
             #[tokio::test]
             async fn should_return_false_for_an_invalid_format() {
                 // Arrange / Act / Assert
-                assert_eq!(evaluate("IsValidNiNumber", vec!["12345".into()]).await.unwrap(), Value::Bool(false));
+                assert_eq!(
+                    evaluate("IsValidNiNumber", vec!["12345".into()])
+                        .await
+                        .unwrap(),
+                    Value::Bool(false)
+                );
             }
         }
     }
@@ -485,8 +605,17 @@ mod custom_conditions {
     #[test]
     fn helpers_build_calls() {
         assert_eq!(is_eligible(50).get("name").as_str(), Some("IsEligible"));
-        assert_eq!(is_valid_ni_number().get("arguments").as_array().map(|a| a.len()), Some(0));
-        assert_eq!(is_before_deadline("2026-12-31").get("arguments").get("0"), Value::from("2026-12-31"));
+        assert_eq!(
+            is_valid_ni_number()
+                .get("arguments")
+                .as_array()
+                .map(|a| a.len()),
+            Some(0)
+        );
+        assert_eq!(
+            is_before_deadline("2026-12-31").get("arguments").get("0"),
+            Value::from("2026-12-31")
+        );
     }
 }
 
@@ -502,7 +631,9 @@ mod custom_transformers {
             FunctionEntry::transformer("RelativeTime", |value, _args| {
                 let date = match value.as_str() {
                     Some(s) => JsDate::parse(s),
-                    None => as_date(value).ok_or_else(|| ForgeError::type_error("RelativeTime expects a string or Date"))?,
+                    None => as_date(value).ok_or_else(|| {
+                        ForgeError::type_error("RelativeTime expects a string or Date")
+                    })?,
                 };
 
                 let diff_ms = JsDate::now().ms - date.ms;
@@ -527,7 +658,11 @@ mod custom_transformers {
                     return Ok(Value::from(value));
                 }
 
-                Ok(Value::from(format!("{}{}", value.chars().take(max_length).collect::<String>(), args[1].to_js_string())))
+                Ok(Value::from(format!(
+                    "{}{}",
+                    value.chars().take(max_length).collect::<String>(),
+                    args[1].to_js_string()
+                )))
             }),
         ]
     }
@@ -547,7 +682,10 @@ mod custom_transformers {
         use forge_core::{FunctionEntry, Value};
 
         async fn evaluate(name: &str, args: Vec<Value>) -> forge_core::ForgeResult<Value> {
-            let entry: FunctionEntry = my_transformers().into_iter().find(|f| &*f.name == name).unwrap();
+            let entry: FunctionEntry = my_transformers()
+                .into_iter()
+                .find(|f| &*f.name == name)
+                .unwrap();
             entry.call(args).await
         }
 
@@ -560,7 +698,9 @@ mod custom_transformers {
                 let value = Value::from("short");
 
                 // Act
-                let result = evaluate("Truncate", vec![value, 10.into(), "...".into()]).await.unwrap();
+                let result = evaluate("Truncate", vec![value, 10.into(), "...".into()])
+                    .await
+                    .unwrap();
 
                 // Assert
                 assert_eq!(result, Value::from("short"));
@@ -572,7 +712,9 @@ mod custom_transformers {
                 let value = Value::from("a long string that should be truncated");
 
                 // Act
-                let result = evaluate("Truncate", vec![value, 10.into(), "...".into()]).await.unwrap();
+                let result = evaluate("Truncate", vec![value, 10.into(), "...".into()])
+                    .await
+                    .unwrap();
 
                 // Assert
                 assert_eq!(result, Value::from("a long str..."));
@@ -591,8 +733,7 @@ mod custom_transformers {
     async fn slugify_and_schema_examples() {
         use forge_core::schema::Schema;
 
-        let slugify =
-        FunctionEntry::transformer("Slugify", |value, _args| {
+        let slugify = FunctionEntry::transformer("Slugify", |value, _args| {
             let Some(value) = value.as_str() else {
                 return Err(ForgeError::type_error("Slugify expects a string"));
             };
@@ -606,25 +747,44 @@ mod custom_transformers {
 
             Ok(Value::from(slug))
         });
-        assert_eq!(slugify.call(vec!["Hello, World!".into()]).await.unwrap(), Value::from("hello-world"));
+        assert_eq!(
+            slugify.call(vec!["Hello, World!".into()]).await.unwrap(),
+            Value::from("hello-world")
+        );
 
-        let schema_truncate =
-        FunctionEntry::transformer("Truncate", |value, args| {
+        let schema_truncate = FunctionEntry::transformer("Truncate", |value, args| {
             let value = value.as_str().unwrap_or_default();
             let max_length = args[0].as_f64().unwrap_or_default() as usize;
             if value.chars().count() <= max_length {
                 return Ok(Value::from(value));
             }
 
-            Ok(Value::from(format!("{}{}", value.chars().take(max_length).collect::<String>(), args[1].to_js_string())))
+            Ok(Value::from(format!(
+                "{}{}",
+                value.chars().take(max_length).collect::<String>(),
+                args[1].to_js_string()
+            )))
         })
         .with_input(Schema::String)
         .with_arguments(Schema::Tuple(vec![
-            Schema::custom("positive integer", |v| v.as_f64().is_some_and(|n| n >= 1.0 && n.fract() == 0.0)),
+            Schema::custom("positive integer", |v| {
+                v.as_f64().is_some_and(|n| n >= 1.0 && n.fract() == 0.0)
+            }),
             Schema::String,
         ]));
-        assert_eq!(schema_truncate.call(vec!["abcdef".into(), 3.into(), "~".into()]).await.unwrap(), Value::from("abc~"));
-        assert!(matches!(schema_truncate.call(vec!["abc".into(), 0.into(), "~".into()]).await, Err(ForgeError::Type { .. })));
+        assert_eq!(
+            schema_truncate
+                .call(vec!["abcdef".into(), 3.into(), "~".into()])
+                .await
+                .unwrap(),
+            Value::from("abc~")
+        );
+        assert!(matches!(
+            schema_truncate
+                .call(vec!["abc".into(), 0.into(), "~".into()])
+                .await,
+            Err(ForgeError::Type { .. })
+        ));
         assert_eq!(truncate(5, "...").get("name").as_str(), Some("Truncate"));
         assert_eq!(relative_time().get("name").as_str(), Some("RelativeTime"));
     }
@@ -659,10 +819,16 @@ mod custom_generators {
             // Produces a unique reference number with the given prefix.
             // args[0] - the string to prepend to the generated number.
             FunctionEntry::generator("NewReferenceNumber", |args| {
-                let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis();
+                let timestamp = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_millis();
                 let sequence = SEQUENCE.fetch_add(1, Ordering::Relaxed) % 10_000;
 
-                Ok(Value::from(format!("{}-{timestamp:x}-{sequence:04}", args[0].to_js_string()).to_uppercase()))
+                Ok(Value::from(
+                    format!("{}-{timestamp:x}-{sequence:04}", args[0].to_js_string())
+                        .to_uppercase(),
+                ))
             }),
         ]
     }
@@ -679,9 +845,10 @@ mod custom_generators {
 
     pub fn sequence_generators(services: Arc<Services>) -> Vec<FunctionEntry> {
         let sequence_service = services.sequence_service.clone();
-        vec![FunctionEntry::generator("NextSequenceNumber", move |_args| {
-            Ok(Value::from(sequence_service.next()))
-        })]
+        vec![FunctionEntry::generator(
+            "NextSequenceNumber",
+            move |_args| Ok(Value::from(sequence_service.next())),
+        )]
     }
 
     mod tests {
@@ -689,7 +856,10 @@ mod custom_generators {
         use forge_core::{FunctionEntry, Value};
 
         fn generator(name: &str) -> FunctionEntry {
-            my_generators().into_iter().find(|f| &*f.name == name).unwrap()
+            my_generators()
+                .into_iter()
+                .find(|f| &*f.name == name)
+                .unwrap()
         }
 
         mod new_reference_number {
@@ -698,7 +868,10 @@ mod custom_generators {
             #[tokio::test]
             async fn should_start_with_the_given_prefix() {
                 // Arrange / Act
-                let result = generator("NewReferenceNumber").call(vec!["REF".into()]).await.unwrap();
+                let result = generator("NewReferenceNumber")
+                    .call(vec!["REF".into()])
+                    .await
+                    .unwrap();
 
                 // Assert
                 assert!(result.to_js_string().starts_with("REF-"));
@@ -722,7 +895,9 @@ mod custom_generators {
             async fn should_call_the_sequence_service() {
                 // Arrange
                 let sequence = Arc::new(StubSequence(AtomicUsize::new(0)));
-                let services = Arc::new(Services { sequence_service: sequence.clone() });
+                let services = Arc::new(Services {
+                    sequence_service: sequence.clone(),
+                });
                 let next_sequence_number = sequence_generators(services).remove(0);
 
                 // Act
@@ -739,8 +914,16 @@ mod custom_generators {
     async fn uuid_and_helpers() {
         let uuid = my_generators()[0].call(vec![]).await.unwrap();
         assert_eq!(uuid.to_js_string().len(), 36);
-        assert_eq!(Value::from(new_reference_number("REF")).get("name").as_str(), Some("NewReferenceNumber"));
-        assert_eq!(Value::from(new_uuid()).get("type").as_str(), Some("FunctionType.Generator"));
+        assert_eq!(
+            Value::from(new_reference_number("REF"))
+                .get("name")
+                .as_str(),
+            Some("NewReferenceNumber")
+        );
+        assert_eq!(
+            Value::from(new_uuid()).get("type").as_str(),
+            Some("FunctionType.Generator")
+        );
     }
 }
 
@@ -750,8 +933,8 @@ mod custom_generators {
 mod custom_effects {
     use std::sync::Mutex;
 
-    use forge_core::{ForgeError, ForgeResult};
     use forge_core::value::Map;
+    use forge_core::{ForgeError, ForgeResult};
 
     pub struct Services {
         pub case_api: Arc<dyn CaseApi>,
@@ -759,11 +942,18 @@ mod custom_effects {
     }
 
     pub trait CaseApi: Send + Sync {
-        fn get_case(&self, id: &str) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<Value>> + Send + '_>>;
+        fn get_case(
+            &self,
+            id: &str,
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<Value>> + Send + '_>>;
     }
 
     pub trait FormDataStore: Send + Sync {
-        fn save(&self, session_id: &str, answers: Map) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<()>> + Send + '_>>;
+        fn save(
+            &self,
+            session_id: &str,
+            answers: Map,
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<()>> + Send + '_>>;
     }
 
     pub struct StubCaseApi(Value, Mutex<Vec<String>>);
@@ -779,7 +969,11 @@ mod custom_effects {
     }
 
     impl CaseApi for StubCaseApi {
-        fn get_case(&self, id: &str) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<Value>> + Send + '_>> {
+        fn get_case(
+            &self,
+            id: &str,
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<Value>> + Send + '_>>
+        {
             self.1.lock().unwrap().push(id.to_string());
             Box::pin(async move { Ok(self.0.clone()) })
         }
@@ -789,14 +983,22 @@ mod custom_effects {
     pub struct StubStore(Mutex<Vec<Map>>);
 
     impl FormDataStore for StubStore {
-        fn save(&self, _session_id: &str, answers: Map) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<()>> + Send + '_>> {
+        fn save(
+            &self,
+            _session_id: &str,
+            answers: Map,
+        ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ForgeResult<()>> + Send + '_>>
+        {
             self.0.lock().unwrap().push(answers);
             Box::pin(async { Ok(()) })
         }
     }
 
     pub fn stub_services() -> Arc<Services> {
-        Arc::new(Services { case_api: Arc::new(StubCaseApi::returning(Value::Null)), form_data_store: Arc::new(StubStore::default()) })
+        Arc::new(Services {
+            case_api: Arc::new(StubCaseApi::returning(Value::Null)),
+            form_data_store: Arc::new(StubStore::default()),
+        })
     }
 
     use std::sync::Arc;
@@ -805,7 +1007,8 @@ mod custom_effects {
     use forge_core::{FunctionEntry, Value, obj};
 
     pub fn my_effects(services: Arc<Services>) -> Vec<FunctionEntry> {
-        let (case_api, form_data_store) = (services.case_api.clone(), services.form_data_store.clone());
+        let (case_api, form_data_store) =
+            (services.case_api.clone(), services.form_data_store.clone());
         vec![
             // Loads case data from the API and sets it on the data context.
             // args[0] - the unique identifier of the case to load.
@@ -836,7 +1039,11 @@ mod custom_effects {
                     "reason": context.get_answer("tripReason"),
                 };
 
-                let mut trips = context.get_answer("trips").as_array().map(|t| t.to_vec()).unwrap_or_default();
+                let mut trips = context
+                    .get_answer("trips")
+                    .as_array()
+                    .map(|t| t.to_vec())
+                    .unwrap_or_default();
                 trips.push(trip);
                 context.set_answer("trips", Value::from(trips))?;
 
@@ -851,7 +1058,16 @@ mod custom_effects {
             FunctionEntry::effect("RemoveTrip", |context, args| async move {
                 let index = args[0].as_f64().unwrap_or(-1.0) as i64;
                 let trips = context.get_answer("trips");
-                let kept: Vec<Value> = trips.as_array().map(|t| t.iter().enumerate().filter(|(i, _)| *i as i64 != index).map(|(_, t)| t.clone()).collect()).unwrap_or_default();
+                let kept: Vec<Value> = trips
+                    .as_array()
+                    .map(|t| {
+                        t.iter()
+                            .enumerate()
+                            .filter(|(i, _)| *i as i64 != index)
+                            .map(|(_, t)| t.clone())
+                            .collect()
+                    })
+                    .unwrap_or_default();
                 context.set_answer("trips", Value::from(kept))
             }),
         ]
@@ -864,7 +1080,10 @@ mod custom_effects {
 
     /// Removes a trip from the trips array by its position.
     pub fn remove_trip(index: i64) -> Value {
-        assert!(index >= 0, "RemoveTrip requires a non-negative integer index");
+        assert!(
+            index >= 0,
+            "RemoveTrip requires a non-negative integer index"
+        );
 
         effect::call("RemoveTrip", vec![Value::from(index)])
     }
@@ -881,13 +1100,19 @@ mod custom_effects {
                 // Arrange
                 let case_data = obj! { "id": "123", "name": "Test case" };
                 let case_api = Arc::new(StubCaseApi::returning(case_data.clone()));
-                let services = Arc::new(Services { case_api: case_api.clone(), form_data_store: Arc::new(StubStore::default()) });
+                let services = Arc::new(Services {
+                    case_api: case_api.clone(),
+                    form_data_store: Arc::new(StubStore::default()),
+                });
 
                 let context = TestEffectContext::new();
                 let load_case_data = effect(&my_effects(services), "LoadCaseData");
 
                 // Act
-                load_case_data.run_effect(context.context(), vec!["123".into()]).await.unwrap();
+                load_case_data
+                    .run_effect(context.context(), vec!["123".into()])
+                    .await
+                    .unwrap();
 
                 // Assert
                 assert_eq!(case_api.requested(), vec!["123".to_string()]);
@@ -911,11 +1136,20 @@ mod custom_effects {
                 let add_trip = effect(&my_effects(stub_services()), "AddTrip");
 
                 // Act
-                add_trip.run_effect(context.context(), vec![]).await.unwrap();
+                add_trip
+                    .run_effect(context.context(), vec![])
+                    .await
+                    .unwrap();
 
                 // Assert
                 let answers = context.answers();
-                assert_eq!(answers.get("trips").and_then(|t| t.as_array()).map(|t| t.len()), Some(2));
+                assert_eq!(
+                    answers
+                        .get("trips")
+                        .and_then(|t| t.as_array())
+                        .map(|t| t.len()),
+                    Some(2)
+                );
                 assert!(answers.get("tripCountry").is_none_or(|v| v.is_undefined()));
             }
         }
@@ -964,18 +1198,18 @@ mod custom_effects {
 
         #[tokio::test]
         async fn typed_answers_deserialise() {
-            let entry =
-                FunctionEntry::effect("SaveAnswers", |context, _args| async move {
-                    let answers: MyAnswers = serde_json::from_value(Value::object(context.get_all_answers()).to_json())
+            let entry = FunctionEntry::effect("SaveAnswers", |context, _args| async move {
+                let answers: MyAnswers =
+                    serde_json::from_value(Value::object(context.get_all_answers()).to_json())
                         .map_err(|e| ForgeError::type_error(e.to_string()))?;
-                    let session: MySession = serde_json::from_value(context.get_session().to_json())
-                        .map_err(|e| ForgeError::type_error(e.to_string()))?;
+                let session: MySession = serde_json::from_value(context.get_session().to_json())
+                    .map_err(|e| ForgeError::type_error(e.to_string()))?;
 
-                    let name = answers.full_name;          // Option<String>
-                    let method = answers.contact_method;   // Option<ContactMethod>
-                    // ...
-                    Ok(())
-                });
+                let name = answers.full_name; // Option<String>
+                let method = answers.contact_method; // Option<ContactMethod>
+                // ...
+                Ok(())
+            });
             let context = forge_core::testing::TestEffectContext::new()
                 .with_answers(obj! { "fullName": "Ada", "contactMethod": "email", "trips": [obj! { "country": "France" }] })
                 .with_session(obj! { "id": "s1", "userId": "u1" });
@@ -985,10 +1219,20 @@ mod custom_effects {
 
     #[tokio::test]
     async fn remove_trip_removes_by_index() {
-        let context = forge_core::testing::TestEffectContext::new().with_answers(obj! { "trips": ["a", "b", "c"] });
-        let remove = my_effects(stub_services()).into_iter().find(|f| &*f.name == "RemoveTrip").unwrap();
-        remove.run_effect(context.context(), vec![1.into()]).await.unwrap();
-        assert_eq!(context.answers().get("trips"), Some(&Value::from(vec![Value::from("a"), Value::from("c")])));
+        let context = forge_core::testing::TestEffectContext::new()
+            .with_answers(obj! { "trips": ["a", "b", "c"] });
+        let remove = my_effects(stub_services())
+            .into_iter()
+            .find(|f| &*f.name == "RemoveTrip")
+            .unwrap();
+        remove
+            .run_effect(context.context(), vec![1.into()])
+            .await
+            .unwrap();
+        assert_eq!(
+            context.answers().get("trips"),
+            Some(&Value::from(vec![Value::from("a"), Value::from("c")]))
+        );
         assert_eq!(remove_trip(2).get("name").as_str(), Some("RemoveTrip"));
     }
 }
@@ -1017,7 +1261,6 @@ mod inline_functions {
     fn content() -> Value {
         govuk::BODY.build(obj! { "text": data("overview.count") })
     }
-
 
     pub fn case_summary(functions: &Functions) -> Value {
         govuk::SUMMARY_LIST.build(obj! {
@@ -1081,7 +1324,6 @@ mod inline_functions {
         })
     }
 
-
     pub fn status_tags(functions: &Functions) -> Vec<Value> {
         let to_status_tag = functions.transformer(|value, _args| {
             Ok(match value.as_str() {
@@ -1093,7 +1335,10 @@ mod inline_functions {
 
         let status_tag = |code: &str| answer(code).pipe([to_status_tag.call(vec![])]);
 
-        vec![status_tag("task1Status").into(), status_tag("task2Status").into()]
+        vec![
+            status_tag("task1Status").into(),
+            status_tag("task2Status").into(),
+        ]
     }
 
     #[tokio::test]
@@ -1102,8 +1347,16 @@ mod inline_functions {
         let functions = Functions::new();
         let mut overview = my_step(&functions, &services);
         let mut blocks = overview.get("blocks").as_array().unwrap().to_vec();
-        blocks.extend([case_summary(&functions), urgent_banner(&functions), timestamp(&functions)]);
-        blocks.extend(status_tags(&functions).into_iter().map(|tag| govuk::TAG.build(obj! { "text": tag.clone() })));
+        blocks.extend([
+            case_summary(&functions),
+            urgent_banner(&functions),
+            timestamp(&functions),
+        ]);
+        blocks.extend(
+            status_tags(&functions)
+                .into_iter()
+                .map(|tag| govuk::TAG.build(obj! { "text": tag.clone() })),
+        );
         overview.set("blocks", Value::from(blocks));
         let journey = journey(obj! {
             "code": "inline-kinds",
@@ -1113,14 +1366,29 @@ mod inline_functions {
             "steps": [overview],
         });
         let mut harness = ForgeTestHarness::new(ForgeOptions::default());
-        harness.register_global_components(forge_govuk_components::components()).unwrap();
-        harness.register_package(ForgePackage::new(journey).with_functions(&functions)).unwrap();
-        let result = harness.create_client(None).get("/inline-kinds/overview", TestRequestOptions::default()).await.unwrap();
+        harness
+            .register_global_components(forge_govuk_components::components())
+            .unwrap();
+        harness
+            .register_package(ForgePackage::new(journey).with_functions(&functions))
+            .unwrap();
+        let result = harness
+            .create_client(None)
+            .get("/inline-kinds/overview", TestRequestOptions::default())
+            .await
+            .unwrap();
         let bodies = result.blocks_by_variant("govukBody");
         assert_eq!(bodies[0].get("properties").get("text"), Value::from(3));
         assert_eq!(bodies.len(), 3, "urgent banner is visible");
         let rows = &result.blocks_by_variant("govukSummaryList")[0];
-        assert_eq!(rows.get("properties").get("rows").get("0").get("value").get("text"), Value::from("Open - urgent"));
+        assert_eq!(
+            rows.get("properties")
+                .get("rows")
+                .get("0")
+                .get("value")
+                .get("text"),
+            Value::from("Open - urgent")
+        );
     }
 }
 
@@ -1130,7 +1398,6 @@ mod custom_components {
     use forge_core::authoring::*;
     use forge_core::{ComponentEntry, Value, obj};
     use forge_runjucks::nunjucks_render;
-
 
     /// A card with a heading and optional body text.
     ///
@@ -1149,10 +1416,13 @@ mod custom_components {
     mod closure_card {
         use super::*;
 
-
         pub fn my_card() -> ComponentEntry {
             ComponentEntry::new("myCard").with_render(|block, _engine| {
-                let border = if block.get("outlined").truthy() { " my-card--outlined" } else { "" };
+                let border = if block.get("outlined").truthy() {
+                    " my-card--outlined"
+                } else {
+                    ""
+                };
                 let content = match block.get("content") {
                     Value::Undefined | Value::Null => String::new(),
                     content => format!(r#"<p class="govuk-body">{}</p>"#, content.to_js_string()),
@@ -1198,7 +1468,6 @@ mod custom_components {
     mod template_card {
         use super::*;
 
-
         fn my_card_params(block: &Value) -> Value {
             obj! {
                 "heading": block.get("heading"),
@@ -1208,7 +1477,10 @@ mod custom_components {
         }
 
         pub fn my_card() -> ComponentEntry {
-            ComponentEntry::new("myCard").with_render(nunjucks_render("components/my-card/template.njk", my_card_params))
+            ComponentEntry::new("myCard").with_render(nunjucks_render(
+                "components/my-card/template.njk",
+                my_card_params,
+            ))
         }
 
         #[test]
@@ -1230,7 +1502,12 @@ mod custom_components {
     fn render_children(children: &Value) -> String {
         children
             .as_array()
-            .map(|children| children.iter().map(|child| child.get("html").to_js_string()).collect())
+            .map(|children| {
+                children
+                    .iter()
+                    .map(|child| child.get("html").to_js_string())
+                    .collect()
+            })
             .unwrap_or_default()
     }
 
@@ -1255,7 +1532,10 @@ mod custom_components {
     }
 
     pub fn govuk_text_input() -> ComponentEntry {
-        ComponentEntry::new("govukTextInput").with_render(nunjucks_render("govuk/components/input/template.njk", text_input_params))
+        ComponentEntry::new("govukTextInput").with_render(nunjucks_render(
+            "govuk/components/input/template.njk",
+            text_input_params,
+        ))
     }
 
     fn escape_html(value: &str) -> String {
@@ -1274,7 +1554,9 @@ mod custom_components {
                 label => escape_html(&label.to_js_string()),
             };
 
-            Ok(Value::from(format!(r#"<span class="my-badge">{label}</span>"#)))
+            Ok(Value::from(format!(
+                r#"<span class="my-badge">{label}</span>"#
+            )))
         })
     }
 
@@ -1306,12 +1588,33 @@ mod custom_components {
         };
         assert_eq!(class_for_field("day"), Some("govuk-input--error"));
         assert_eq!(class_for_field("month"), None);
-        assert_eq!(render_children(&Value::from(vec![obj! { "html": "<a>" }, obj! { "html": "<b>" }])), "<a><b>");
+        assert_eq!(
+            render_children(&Value::from(vec![
+                obj! { "html": "<a>" },
+                obj! { "html": "<b>" }
+            ])),
+            "<a><b>"
+        );
         let html = (my_badge().render.unwrap())(&obj! { "label": "<x>" }, &()).unwrap();
-        assert_eq!(html, Value::from(r#"<span class="my-badge">&lt;x&gt;</span>"#));
-        assert_eq!(text_input_params(&obj! { "code": "email", "label": "Email" }).get("id"), Value::from("email"));
-        assert_eq!(MY_CARD.build(obj! { "heading": "Title" }).get("variant"), Value::from("myCard"));
-        assert_eq!(MY_STAR_RATING.build(obj! { "code": "rating" }).get("blockType").as_str(), Some("BlockType.field"));
+        assert_eq!(
+            html,
+            Value::from(r#"<span class="my-badge">&lt;x&gt;</span>"#)
+        );
+        assert_eq!(
+            text_input_params(&obj! { "code": "email", "label": "Email" }).get("id"),
+            Value::from("email")
+        );
+        assert_eq!(
+            MY_CARD.build(obj! { "heading": "Title" }).get("variant"),
+            Value::from("myCard")
+        );
+        assert_eq!(
+            MY_STAR_RATING
+                .build(obj! { "code": "rating" })
+                .get("blockType")
+                .as_str(),
+            Some("BlockType.field")
+        );
     }
 }
 
@@ -1348,10 +1651,15 @@ mod request_state_page {
     async fn opaque_state_reaches_effects() {
         let effect = FunctionEntry::effect("LoadClientDetails", |context, args| async move {
             let state = context.get_state("authenticatedClient");
-            let Some(AuthenticatedClient(client)) = state.downcast::<AuthenticatedClient>().cloned() else {
+            let Some(AuthenticatedClient(client)) =
+                state.downcast::<AuthenticatedClient>().cloned()
+            else {
                 return Ok(());
             };
-            context.set_data("clientDetails", Value::from(format!("{} for {}", args[0].to_js_string(), client.user)))
+            context.set_data(
+                "clientDetails",
+                Value::from(format!("{} for {}", args[0].to_js_string(), client.user)),
+            )
         });
         let journey = journey(obj! {
             "code": "client",
@@ -1365,10 +1673,24 @@ mod request_state_page {
             })],
         });
         let mut harness = ForgeTestHarness::new(ForgeOptions::default());
-        harness.register_package(ForgePackage::new(journey).with_functions([effect])).unwrap();
+        harness
+            .register_package(ForgePackage::new(journey).with_functions([effect]))
+            .unwrap();
         let client = harness.create_client(None);
         let state = obj! { "authenticatedClient": Value::opaque(AuthenticatedClient(Arc::new(ApiClient { user: "ada".into() }))) };
-        let result = client.get("/client/details", TestRequestOptions { state, ..TestRequestOptions::default() }).await.unwrap();
-        assert_eq!(result.context().unwrap().get("data").get("clientDetails"), Value::from("CASE-1 for ada"));
+        let result = client
+            .get(
+                "/client/details",
+                TestRequestOptions {
+                    state,
+                    ..TestRequestOptions::default()
+                },
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            result.context().unwrap().get("data").get("clientDetails"),
+            Value::from("CASE-1 for ada")
+        );
     }
 }

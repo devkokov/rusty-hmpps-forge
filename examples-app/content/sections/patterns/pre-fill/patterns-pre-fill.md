@@ -143,11 +143,12 @@ set so the POST data triggers the lookup submit hook. It uses the
 primary "Continue" button:
 
 ```rust
-let find_address_button = govuk::BUTTON.build(obj! {
-    "text": "Find address",
-    "name": "action",
-    "value": "find-address",
-    "classes": "govuk-button--secondary",
+let find_address_button = govuk::BUTTON.build(
+    ButtonProps::action()
+        .text("Find address")
+        .classes("govuk-button--secondary")
+        .name("action")
+        .value("find-address"),
 });
 ```
 

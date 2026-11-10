@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn panel() -> Value {
     govuk::PANEL.build(obj! {
@@ -15,10 +16,11 @@ pub fn next_steps() -> Value {
 }
 
 pub fn restart_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Restart pattern",
-        "name": "action",
-        "value": "restart",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::BUTTON.build(
+        ButtonProps::action()
+            .text("Restart pattern")
+            .classes("govuk-button--secondary")
+            .name("action")
+            .value("restart"),
+    )
 }

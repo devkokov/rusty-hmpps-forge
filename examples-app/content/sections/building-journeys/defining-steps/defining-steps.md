@@ -139,7 +139,7 @@ let country_field = govuk::SELECT_INPUT.build(obj! {
     "label": obj! { "text": "Which country did you visit?" },
     "items": data("countries"),
 });
-let continue_button = govuk::BUTTON.build(obj! { "text": "Save and continue" });
+let continue_button = govuk::BUTTON.build(ButtonProps::action().text("Save and continue"));
 ```
 
 ```rust

@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_govuk_components::classes;
 
 pub fn is_admin() -> Value {
@@ -110,9 +111,9 @@ pub fn save_button() -> Value {
 }
 
 pub fn back_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Back to contacts",
-        "href": "/forge-developer-guide/patterns/demos/read-only-mode/contacts",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/read-only-mode/contacts")
+            .text("Back to contacts")
+            .classes("govuk-button--secondary"),
+    )
 }

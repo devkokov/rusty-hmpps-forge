@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_core::builtins::components as core_blocks;
 
 pub fn heading() -> Value {
@@ -15,11 +16,11 @@ pub fn post_count() -> Value {
 }
 
 pub fn write_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Write a new post",
-        "href": "/forge-developer-guide/patterns/demos/cms-content/write",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/cms-content/write")
+            .text("Write a new post")
+            .classes("govuk-button--secondary"),
+    )
 }
 
 pub fn posts_list() -> Value {

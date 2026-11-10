@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_govuk_components::classes;
 use forge_core::builtins::components as core_blocks;
 
@@ -116,17 +117,14 @@ pub fn member_rows() -> Value {
 pub fn button_group() -> Value {
     govuk::BUTTON_GROUP.build(obj! {
         "buttons": [
-            govuk::BUTTON.build(obj! {
-                "text": "Add another person",
-                "name": "action",
-                "value": "add-another",
-                "classes": "govuk-button--secondary",
-            }),
-            govuk::BUTTON.build(obj! {
-                "text": "Continue",
-                "name": "action",
-                "value": "continue",
-            }),
+            govuk::BUTTON.build(
+                ButtonProps::action()
+                    .text("Add another person")
+                    .classes("govuk-button--secondary")
+                    .name("action")
+                    .value("add-another"),
+            ),
+            govuk::BUTTON.build(ButtonProps::action().text("Continue").name("action").value("continue")),
         ],
     })
 }

@@ -43,7 +43,7 @@ core_blocks::TEMPLATE_WRAPPER.build(obj! {
     },
     "slots": obj! {
         "body": [govuk::BODY.build(obj! { "text": "Some content inside the card." })],
-        "actions": [govuk::BUTTON.build(obj! { "text": "Continue" })],
+        "actions": [govuk::BUTTON.build(ButtonProps::action().text("Continue"))],
     },
 })
 ```
@@ -226,8 +226,8 @@ core_blocks::TEMPLATE_WRAPPER.build(obj! {
     "template": "<div class=\"govuk-button-group\">{{slot:buttons}}</div>",
     "slots": obj! {
         "buttons": [
-            govuk::BUTTON.build(obj! { "text": "Save and continue" }),
-            govuk::BUTTON.build(obj! { "text": "Cancel", "classes": "govuk-button--secondary" }),
+            govuk::BUTTON.build(ButtonProps::action().text("Save and continue")),
+            govuk::BUTTON.build(ButtonProps::action().text("Cancel").classes("govuk-button--secondary")),
         ],
     },
 })

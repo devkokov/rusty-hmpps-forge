@@ -31,6 +31,7 @@ You describe your journey declaratively:
 use forge_core::authoring::*;
 use forge_core::obj;
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::{ButtonProps, Content};
 
 let my_journey = journey(obj! {
     "code": "my-form",
@@ -42,7 +43,7 @@ let my_journey = journey(obj! {
         "reachability": obj! { "entryWhen": true },
         "blocks": [
             govuk::TEXT_INPUT.build(obj! { "code": "fullName", "label": obj! { "text": "Full name" } }),
-            govuk::BUTTON.build(obj! { "text": "Continue" }),
+            govuk::BUTTON.build(ButtonProps::action().text("Continue")),
         ],
     })],
 });

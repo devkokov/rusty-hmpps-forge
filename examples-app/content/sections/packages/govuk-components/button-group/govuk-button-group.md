@@ -31,12 +31,8 @@ use forge_govuk_components::blocks as govuk;
 
 govuk::BUTTON_GROUP.build(obj! {
     "buttons": [
-        govuk::BUTTON.build(obj! { "text": "Save and continue" }),
-        govuk::LINK_BUTTON.build(obj! {
-            "text": "Cancel",
-            "href": "/overview",
-            "classes": "govuk-button--secondary",
-        }),
+        govuk::BUTTON.build(ButtonProps::action().text("Save and continue")),
+        govuk::LINK_BUTTON.build(ButtonProps::link("/overview").text("Cancel").classes("govuk-button--secondary")),
     ],
 })
 ```
@@ -52,8 +48,8 @@ Pair a primary button with a secondary action.
 ```rust
 govuk::BUTTON_GROUP.build(obj! {
     "buttons": [
-        govuk::BUTTON.build(obj! { "text": "Submit" }),
-        govuk::BUTTON.build(obj! { "text": "Save as draft", "classes": "govuk-button--secondary" }),
+        govuk::BUTTON.build(ButtonProps::action().text("Submit")),
+        govuk::BUTTON.build(ButtonProps::action().text("Save as draft").classes("govuk-button--secondary")),
     ],
 })
 ```
@@ -65,8 +61,8 @@ govuk::BUTTON_GROUP.build(obj! {
 ```rust
 govuk::BUTTON_GROUP.build(obj! {
     "buttons": [
-        govuk::BUTTON.build(obj! { "text": "Save changes" }),
-        govuk::BUTTON.build(obj! { "text": "Delete", "classes": "govuk-button--warning" }),
+        govuk::BUTTON.build(ButtonProps::action().text("Save changes")),
+        govuk::BUTTON.build(ButtonProps::action().text("Delete").classes("govuk-button--warning")),
     ],
 })
 ```

@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{FunctionEntry, Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 fn risk_level_tag(functions: &Functions) -> FunctionHandle {
     functions.register(FunctionEntry::transformer("RiskLevelTag", |value, _args| {
@@ -104,9 +105,9 @@ pub fn compliance_summary(functions: &Functions) -> Value {
 }
 
 pub fn back_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Back to the verbose version",
-        "href": "/forge-developer-guide/patterns/demos/inline-functions/before",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/inline-functions/before")
+            .text("Back to the verbose version")
+            .classes("govuk-button--secondary"),
+    )
 }

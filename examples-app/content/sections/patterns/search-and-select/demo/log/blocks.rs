@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! {
@@ -35,9 +36,9 @@ pub fn description() -> Value {
 }
 
 pub fn back_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Back to search",
-        "href": "/forge-developer-guide/patterns/demos/search-and-select/search",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/search-and-select/search")
+            .text("Back to search")
+            .classes("govuk-button--secondary"),
+    )
 }

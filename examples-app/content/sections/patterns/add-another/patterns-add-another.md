@@ -178,17 +178,19 @@ buttons whose `value` distinguishes the intent:
 ```rust
 govuk::BUTTON_GROUP.build(obj! {
     "buttons": [
-        govuk::BUTTON.build(obj! {
-            "text": "Add another contact",
-            "classes": "govuk-button--secondary",
-            "name": "action",
-            "value": "add-another",
-        }),
-        govuk::BUTTON.build(obj! {
-            "text": "Continue",
-            "name": "action",
-            "value": "continue",
-        }),
+        govuk::BUTTON.build(
+            ButtonProps::action()
+                .text("Add another contact")
+                .classes("govuk-button--secondary")
+                .name("action")
+                .value("add-another"),
+        ),
+        govuk::BUTTON.build(
+            ButtonProps::action()
+                .text("Continue")
+                .name("action")
+                .value("continue"),
+        ),
     ],
 })
 ```

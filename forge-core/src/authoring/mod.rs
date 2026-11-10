@@ -712,7 +712,8 @@ impl Component {
         Self { prepare: Some(prepare), ..self }
     }
 
-    pub fn build(&self, props: Value) -> Value {
+    pub fn build(&self, props: impl IntoValue) -> Value {
+        let props = props.into_value();
         let props = if props.is_undefined() { Value::empty_object() } else { props };
         let prepared = match self.prepare {
             Some(p) => p(props),

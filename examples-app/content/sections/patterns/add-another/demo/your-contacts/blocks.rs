@@ -2,6 +2,7 @@ use forge_core::authoring::*;
 use forge_core::builtins::components as core_blocks;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! {
@@ -61,17 +62,19 @@ pub fn contact_cards() -> Value {
 pub fn button_group() -> Value {
     govuk::BUTTON_GROUP.build(obj! {
         "buttons": [
-            govuk::BUTTON.build(obj! {
-                "text": "Add another contact",
-                "classes": "govuk-button--secondary",
-                "name": "action",
-                "value": "add-another",
-            }),
-            govuk::BUTTON.build(obj! {
-                "text": "Continue",
-                "name": "action",
-                "value": "continue",
-            }),
+            govuk::BUTTON.build(
+                ButtonProps::action()
+                    .text("Add another contact")
+                    .classes("govuk-button--secondary")
+                    .name("action")
+                    .value("add-another"),
+            ),
+            govuk::BUTTON.build(
+                ButtonProps::action()
+                    .text("Continue")
+                    .name("action")
+                    .value("continue"),
+            ),
         ],
     })
 }

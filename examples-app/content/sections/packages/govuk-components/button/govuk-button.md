@@ -25,13 +25,42 @@ provides two components: `govuk::BUTTON` for form submissions and
 A `<button>` element for form actions. It defaults to `type="submit"`
 and `name="action"`.
 
+`govuk::BUTTON` takes a typed `ButtonProps` struct. Your editor
+autocompletes its fields, and unset fields are left out of the output.
+
 ```rust
 use forge_core::authoring::*;
-use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
-govuk::BUTTON.build(obj! { "text": "Continue" })
+govuk::BUTTON.build(ButtonProps::action().text("Continue"))
 ```
+
+### Builder
+
+For a shorter call site, chain methods on `ButtonProps` instead. `ButtonProps::action()`
+starts a `<button>` and `ButtonProps::link(href)` starts a link button.
+
+```rust
+use forge_govuk_components::props::{ButtonProps, ButtonType};
+
+govuk::BUTTON.build(
+    ButtonProps::action()
+        .text("Continue")
+        .name("action")
+        .button_type(ButtonType::Submit)
+        .disabled(false),
+)
+
+govuk::LINK_BUTTON.build(
+    ButtonProps::link("/cancel")
+        .text("Cancel")
+        .classes("govuk-button--secondary"),
+)
+```
+
+Setters that only apply to `<button>` (such as `name`, `value`, `disabled`
+and `button_type`) are ignored on a link button.
 
 ### Button value
 
@@ -39,33 +68,28 @@ Use `value` to distinguish between multiple buttons on a page.
 Check the submitted value with `post("action")` in submit hooks.
 
 ```rust
-govuk::BUTTON.build(obj! { "text": "Save and continue", "value": "continue" })
-govuk::BUTTON.build(obj! {
-    "text": "Save as draft",
-    "value": "draft",
-    "classes": "govuk-button--secondary",
-})
+govuk::BUTTON.build(ButtonProps::action().text("Save and continue").value("continue"))
+govuk::BUTTON.build(
+    ButtonProps::action()
+        .text("Save as draft")
+        .classes("govuk-button--secondary")
+        .value("draft"),
+)
 ```
 
 ### Prevent double clicks
 
-Set `"preventDoubleClick": true` to disable the button after the first
-click, preventing duplicate submissions.
+Set `prevent_double_click` to `Some(true)` to disable the button after
+the first click, preventing duplicate submissions.
 
 ```rust
-govuk::BUTTON.build(obj! {
-    "text": "Submit application",
-    "preventDoubleClick": true,
-})
+govuk::BUTTON.build(ButtonProps::action().text("Submit application").prevent_double_click(true))
 ```
 
 ### Disabled state
 
 ```rust
-govuk::BUTTON.build(obj! {
-    "text": "Submit",
-    "disabled": true,
-})
+govuk::BUTTON.build(ButtonProps::action().text("Submit").disabled(true))
 ```
 
 ---
@@ -73,19 +97,17 @@ govuk::BUTTON.build(obj! {
 ## GovUKLinkButton
 
 An `<a>` element styled as a button. Use it for navigation actions
-that look like buttons. The `href` property is required.
+that look like buttons. `ButtonKind::Link` requires an `href`, so a
+link button can't be missing one.
 
 {{slot:link-example}}
 
 ```rust
 use forge_core::authoring::*;
-use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
-govuk::LINK_BUTTON.build(obj! {
-    "text": "Start now",
-    "href": "/application/start",
-})
+govuk::LINK_BUTTON.build(ButtonProps::link("/application/start").text("Start now"))
 ```
 
 ---
@@ -99,12 +121,12 @@ Use `govuk-button--secondary` for less prominent actions.
 {{slot:secondary-example}}
 
 ```rust
-govuk::BUTTON.build(obj! { "text": "Save as draft", "classes": "govuk-button--secondary" })
-govuk::LINK_BUTTON.build(obj! {
-    "text": "Cancel",
-    "href": "/overview",
-    "classes": "govuk-button--secondary",
-})
+govuk::BUTTON.build(ButtonProps::action().text("Save as draft").classes("govuk-button--secondary"))
+govuk::LINK_BUTTON.build(
+    ButtonProps::link("/overview")
+        .text("Cancel")
+        .classes("govuk-button--secondary"),
+)
 ```
 
 ### Warning
@@ -114,29 +136,27 @@ Use `govuk-button--warning` for destructive actions like delete.
 {{slot:warning-example}}
 
 ```rust
-govuk::BUTTON.build(obj! { "text": "Delete account", "classes": "govuk-button--warning" })
+govuk::BUTTON.build(ButtonProps::action().text("Delete account").classes("govuk-button--warning"))
 ```
 
 ### Start button
 
-Use `"isStartButton": true` for the main call-to-action on a start
-page. This adds an arrow icon.
+Set `is_start_button` to `Some(true)` for the main call-to-action on a
+start page. This adds an arrow icon.
 
 {{slot:start-example}}
 
 ```rust
-govuk::LINK_BUTTON.build(obj! {
-    "text": "Start now",
-    "href": "/application/start",
-    "isStartButton": true,
-})
+govuk::LINK_BUTTON.build(ButtonProps::link("/application/start").text("Start now").start_button(true))
 ```
 
 ---
 
 ## Dynamic href
 
-Use expressions for dynamic navigation links.
+Use expressions for dynamic navigation links. `ButtonKind::Link` takes a
+plain `String`, so an expression such as `format(...)` can't be passed
+to it. Build the link with `obj!` instead, as shown below.
 
 ```rust
 govuk::LINK_BUTTON.build(obj! {
