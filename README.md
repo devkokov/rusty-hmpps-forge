@@ -164,7 +164,7 @@ directory (`.dockerignore` keeps `target/`, corpora and tooling out).
   template binding, imported macros closing over their template's imports (govuk/header's `govukLogo` calls
   `govukAttributes`), blocks nested in other blocks taking part in inheritance (Nunjucks registers every block in a
   template, so a layout can override and `super()` into GOV.UK's `govukFooter` inside `footer`),
-  `Array.prototype.join`, `select` / `reject` without a test name testing truthiness, `not` binding looser than `in` / `is` / comparisons, and `sameas`
+  `Array.prototype.join`, `select` / `reject` without a test name testing truthiness, keyword arguments in filter calls (`| sort(attribute='date')`, by `sort` / `int`'s parameter names), `not` binding looser than `in` / `is` / comparisons, and `sameas`
   as reference identity: object values carry an origin (context path, list-literal element, or a fresh id for
   anything built while rendering) through `set`, `for` and macro arguments, so objects with equal contents
   stay distinct, as govuk-frontend's date input needs (all vendored changes: `vendor/runjucks_core.patch`;

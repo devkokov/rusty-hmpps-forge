@@ -87,3 +87,13 @@ fn select_without_a_test_keeps_truthy_items() {
     assert_eq!(render("{{ [1, 0, 'a', false] | reject | length }}", json!({})), "2");
     assert_eq!(render("{{ [1, 2, 3] | select('odd') | join(',') }}", json!({})), "1,3");
 }
+
+/// Keyword arguments in filter calls: `sort` and `int` take them by parameter name, as Nunjucks
+/// defines those built-ins (`| sort(attribute="date")`).
+#[test]
+fn filters_take_keyword_arguments() {
+    let items = json!({ "items": [{ "date": "2025-01-02" }, { "date": "2025-01-01" }, { "date": "2025-01-03" }] });
+    assert_eq!(render("{% for i in items | sort(attribute='date') %}{{ i.date }},{% endfor %}", items.clone()), "2025-01-01,2025-01-02,2025-01-03,");
+    assert_eq!(render("{% for i in items | sort(true, attribute='date') %}{{ i.date }},{% endfor %}", items), "2025-01-03,2025-01-02,2025-01-01,");
+    assert_eq!(render("{{ 'x' | int(default=7) }}|{{ 'ff' | int(base=16) }}", json!({})), "7|255");
+}

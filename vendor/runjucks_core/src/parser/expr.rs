@@ -589,6 +589,44 @@ fn parse_atom_with_postfix(input: &str) -> IResult<&str, Expr> {
     parse_postfix(rest, atom)
 }
 
+/// Nunjucks's named filter parameters (built-ins defined with `makeMacro`), after the input.
+fn filter_parameter_names(name: &str) -> Option<&'static [&'static str]> {
+    match name {
+        "sort" => Some(&["reverse", "case_sensitive", "attribute"]),
+        "int" => Some(&["default", "base"]),
+        _ => None,
+    }
+}
+
+/// Keyword arguments to a filter, as Nunjucks applies them: for a built-in with named parameters
+/// (`sort(attribute="date")`) each fills its parameter's position (skipped positions are null);
+/// any other filter gets them as a trailing object, as Nunjucks passes its keyword-arguments object.
+fn filter_args_with_keywords(name: &str, mut args: Vec<Expr>, kwargs: Vec<(String, Expr)>) -> Vec<Expr> {
+    if kwargs.is_empty() {
+        return args;
+    }
+    match filter_parameter_names(name) {
+        Some(names) => {
+            for (key, value) in kwargs {
+                let Some(index) = names.iter().position(|n| *n == key) else {
+                    continue;
+                };
+                while args.len() <= index {
+                    args.push(Expr::Literal(serde_json::Value::Null));
+                }
+                args[index] = value;
+            }
+        }
+        None => args.push(Expr::Dict(
+            kwargs
+                .into_iter()
+                .map(|(k, v)| (Expr::Literal(serde_json::Value::String(k)), v))
+                .collect(),
+        )),
+    }
+    args
+}
+
 fn parse_filter_chain(input: &str, mut node: Expr) -> IResult<&str, Expr> {
     let mut rest = input;
     loop {
@@ -605,12 +643,7 @@ fn parse_filter_chain(input: &str, mut node: Expr) -> IResult<&str, Expr> {
         } else {
             (after_name, (vec![], vec![]))
         };
-        if !filter_kw.is_empty() {
-            return Err(nom::Err::Failure(nom::error::Error::new(
-                after_name,
-                nom::error::ErrorKind::Verify,
-            )));
-        }
+        let extra_args = filter_args_with_keywords(&name, extra_args, filter_kw);
         node = Expr::Filter {
             name,
             input: Box::new(node),
