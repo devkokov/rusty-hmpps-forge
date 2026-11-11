@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_govuk_components::classes;
 
 pub fn heading() -> Value {
@@ -52,15 +53,15 @@ pub fn agree_plan_field() -> Value {
 }
 
 pub fn continue_button() -> Value {
-    govuk::BUTTON.build(obj! { "text": "Continue" })
+    govuk::BUTTON.build(ButtonProps::action().text("Continue"))
 }
 
 pub fn manage_goals_link() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Add actions to goals",
-        "href": "/forge-developer-guide/patterns/demos/collection-validation/manage-plan",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/collection-validation/manage-plan")
+            .text("Add actions to goals")
+            .classes("govuk-button--secondary"),
+    )
 }
 
 pub fn button_group() -> Value {

@@ -26,6 +26,7 @@ confirmation page.
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::{ButtonProps, Content};
 
 fn name_step() -> Value {
     step(obj! {
@@ -41,7 +42,7 @@ fn name_step() -> Value {
                     "classes": "govuk-label--l",
                 },
             }),
-            govuk::BUTTON.build(obj! { "text": "Continue" }),
+            govuk::BUTTON.build(ButtonProps::action().text("Continue")),
         ],
         "onSubmission": [submit(obj! {
             "validate": true,
@@ -66,7 +67,7 @@ fn feedback_step() -> Value {
                 },
                 "hint": obj! { "text": "Tell us what you think of this service." },
             }),
-            govuk::BUTTON.build(obj! { "text": "Send feedback" }),
+            govuk::BUTTON.build(ButtonProps::action().text("Send feedback")),
         ],
         "onSubmission": [submit(obj! {
             "validate": true,

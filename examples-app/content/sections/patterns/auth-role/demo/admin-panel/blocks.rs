@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! { "text": "Admin panel", "size": "l" })
@@ -13,9 +14,9 @@ pub fn body() -> Value {
 }
 
 pub fn back_link() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Back to dashboard",
-        "href": "/forge-developer-guide/patterns/demos/auth-role/dashboard",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/auth-role/dashboard")
+            .text("Back to dashboard")
+            .classes("govuk-button--secondary"),
+    )
 }

@@ -6,6 +6,7 @@
 
 pub mod classes;
 pub mod jsx;
+pub mod props;
 pub mod validations;
 
 /// `GovUKUtilityClasses`: GOV.UK Frontend utility class names (generated from the TS object).

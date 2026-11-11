@@ -169,11 +169,11 @@ the access hook runs on every GET request, a page refresh
 produces new values with no extra wiring:
 
 ```rust
-let draw_again_button = govuk::LINK_BUTTON.build(obj! {
-    "text": "Draw again",
-    "href": "/forge-developer-guide/patterns/demos/load-reference-data/draw",
-    "classes": "govuk-button--secondary",
-});
+let draw_again_button = govuk::LINK_BUTTON.build(
+    ButtonProps::link("/forge-developer-guide/patterns/demos/load-reference-data/draw")
+        .text("Draw again")
+        .classes("govuk-button--secondary"),
+);
 ```
 
 ---

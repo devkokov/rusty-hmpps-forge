@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_govuk_components::classes;
 
 pub fn heading() -> Value {
@@ -35,12 +36,13 @@ pub fn postcode_field() -> Value {
 }
 
 pub fn find_address_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Find address",
-        "name": "action",
-        "value": "find-address",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::BUTTON.build(
+        ButtonProps::action()
+            .text("Find address")
+            .classes("govuk-button--secondary")
+            .name("action")
+            .value("find-address"),
+    )
 }
 
 pub fn address_line1_field() -> Value {
@@ -109,11 +111,12 @@ pub fn address_postcode_field() -> Value {
 pub fn button_group() -> Value {
     govuk::BUTTON_GROUP.build(obj! {
         "buttons": [
-            govuk::BUTTON.build(obj! {
-                "text": "Continue",
-                "name": "action",
-                "value": "continue",
-            }),
+            govuk::BUTTON.build(
+                ButtonProps::action()
+                    .text("Continue")
+                    .name("action")
+                    .value("continue"),
+            ),
         ],
     })
 }

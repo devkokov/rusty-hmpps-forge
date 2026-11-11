@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_govuk_components::classes;
 
 pub fn phone_number_field() -> Value {
@@ -29,5 +30,5 @@ pub fn phone_number_field() -> Value {
 }
 
 pub fn continue_button() -> Value {
-    govuk::BUTTON.build(obj! { "text": "Continue" })
+    govuk::BUTTON.build(ButtonProps::action().text("Continue"))
 }

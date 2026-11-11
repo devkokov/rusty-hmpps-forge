@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! {
@@ -87,5 +88,5 @@ pub fn confirm_body() -> Value {
 }
 
 pub fn submit_button() -> Value {
-    govuk::BUTTON.build(obj! { "text": "Confirm" })
+    govuk::BUTTON.build(ButtonProps::action().text("Confirm"))
 }

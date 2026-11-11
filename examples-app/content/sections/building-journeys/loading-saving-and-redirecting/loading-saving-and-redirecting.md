@@ -157,18 +157,13 @@ primary button submits the form through a submit hook instead:
 step(obj! {
     "blocks": [
         govuk::TEXT_INPUT.build(obj! { "code": "postcode", "label": "Postcode" }),
-        govuk::BUTTON.build(obj! {
-            "text": "Find address",
-            "name": "action",
-            "value": "lookup",
-            "classes": "govuk-button--secondary",
-        }),
+        govuk::BUTTON.build(ButtonProps::action().text("Find address").classes("govuk-button--secondary").name("action").value("lookup")),
         govuk::SELECT_INPUT.build(obj! {
             "code": "address",
             "label": "Select an address",
             "items": data("addresses"),
         }),
-        govuk::BUTTON.build(obj! { "text": "Continue", "name": "action", "value": "continue" }),
+        govuk::BUTTON.build(ButtonProps::action().text("Continue").name("action").value("continue")),
     ],
     "onSubmission": [
         submit(obj! {

@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_core::builtins::components as core_blocks;
 
 pub fn heading() -> Value {
@@ -27,11 +28,7 @@ pub fn member_summaries() -> Value {
 }
 
 pub fn change_link() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Change household members",
-        "href": "household-members",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(ButtonProps::link("household-members").text("Change household members").classes("govuk-button--secondary"))
 }
 
 pub fn confirm_body() -> Value {
@@ -41,5 +38,5 @@ pub fn confirm_body() -> Value {
 }
 
 pub fn submit_button() -> Value {
-    govuk::BUTTON.build(obj! { "text": "Confirm" })
+    govuk::BUTTON.build(ButtonProps::action().text("Confirm"))
 }

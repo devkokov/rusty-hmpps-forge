@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn panel() -> Value {
     govuk::PANEL.build(obj! {
@@ -17,10 +18,11 @@ pub fn what_next() -> Value {
 
 // Posts action='restart' to trigger the onSubmission handler that resets the journey
 pub fn restart_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Start a new application",
-        "name": "action",
-        "value": "restart",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::BUTTON.build(
+        ButtonProps::action()
+            .text("Start a new application")
+            .classes("govuk-button--secondary")
+            .name("action")
+            .value("restart"),
+    )
 }

@@ -239,7 +239,7 @@ let add_trip_step = step(obj! {
                 }),
             ]),
         }),
-        govuk::BUTTON.build(obj! { "text": "Save and continue" }),
+        govuk::BUTTON.build(ButtonProps::action().text("Save and continue")),
     ],
     "onAccess": [access(obj! {
         "effects": [effect::call("LoadCountries", vec![])],

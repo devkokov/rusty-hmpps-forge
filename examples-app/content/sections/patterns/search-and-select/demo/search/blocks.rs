@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_govuk_components::classes;
 use forge_core::builtins::components as core_blocks;
 
@@ -18,7 +19,7 @@ pub fn search_input() -> Value {
 }
 
 pub fn search_button() -> Value {
-    govuk::BUTTON.build(obj! { "text": "Search" })
+    govuk::BUTTON.build(ButtonProps::action().text("Search"))
 }
 
 pub fn results_heading() -> Value {

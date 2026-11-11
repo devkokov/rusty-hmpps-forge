@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use crate::components::RICH_TEXT_EDITOR;
 
 pub fn heading() -> Value {
@@ -35,5 +36,5 @@ pub fn body_editor() -> Value {
 }
 
 pub fn publish_button() -> Value {
-    govuk::BUTTON.build(obj! { "text": "Publish post" })
+    govuk::BUTTON.build(ButtonProps::action().text("Publish post"))
 }

@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 fn relationship_label(relationship: Ex) -> Value {
     match_(relationship)
@@ -44,18 +45,20 @@ pub fn contact_summary() -> Value {
 pub fn buttons() -> Value {
     govuk::BUTTON_GROUP.build(obj! {
         "buttons": [
-            govuk::BUTTON.build(obj! {
-                "text": "Remove contact",
-                "classes": "govuk-button--warning",
-                "name": "action",
-                "value": "confirm",
-            }),
-            govuk::BUTTON.build(obj! {
-                "text": "Cancel",
-                "classes": "govuk-button--secondary",
-                "name": "action",
-                "value": "cancel",
-            }),
+            govuk::BUTTON.build(
+                ButtonProps::action()
+                    .text("Remove contact")
+                    .classes("govuk-button--warning")
+                    .name("action")
+                    .value("confirm"),
+            ),
+            govuk::BUTTON.build(
+                ButtonProps::action()
+                    .text("Cancel")
+                    .classes("govuk-button--secondary")
+                    .name("action")
+                    .value("cancel"),
+            ),
         ],
     })
 }

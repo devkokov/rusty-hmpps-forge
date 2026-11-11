@@ -38,8 +38,8 @@ submit buttons, each one sends a different value, and hooks use
 `post()` to determine which was pressed:
 
 ```rust
-govuk::BUTTON.build(obj! { "text": "Save and continue", "name": "action", "value": "continue" })
-govuk::BUTTON.build(obj! { "text": "Save as draft", "name": "action", "value": "saveDraft" })
+govuk::BUTTON.build(ButtonProps::action().text("Save and continue").name("action").value("continue"))
+govuk::BUTTON.build(ButtonProps::action().text("Save as draft").name("action").value("saveDraft"))
 ```
 
 ```rust
@@ -109,12 +109,8 @@ The most common pattern. Each button shares the same `name` but has
 a different `value`, and hooks match on it:
 
 ```rust
-govuk::BUTTON.build(obj! { "text": "Add steps", "name": "action", "value": "addSteps" })
-govuk::BUTTON.build(obj! {
-    "text": "Save without steps",
-    "name": "action",
-    "value": "saveWithoutSteps",
-})
+govuk::BUTTON.build(ButtonProps::action().text("Add steps").name("action").value("addSteps"))
+govuk::BUTTON.build(ButtonProps::action().text("Save without steps").name("action").value("saveWithoutSteps"))
 ```
 
 ```rust

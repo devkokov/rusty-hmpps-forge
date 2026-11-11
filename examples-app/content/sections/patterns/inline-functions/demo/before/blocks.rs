@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! {
@@ -103,8 +104,7 @@ pub fn compliance_summary() -> Value {
 }
 
 pub fn next_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "See the refactored version",
-        "href": "/forge-developer-guide/patterns/demos/inline-functions/after",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/inline-functions/after").text("See the refactored version"),
+    )
 }

@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! { "text": "Dashboard", "size": "l" })
@@ -20,17 +21,17 @@ pub fn viewer_warning() -> Value {
 }
 
 pub fn admin_link() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Go to admin panel",
-        "href": "/forge-developer-guide/patterns/demos/auth-role/admin-panel",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/auth-role/admin-panel").text("Go to admin panel"),
+    )
 }
 
 pub fn logout_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Log out",
-        "name": "action",
-        "value": "logout",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::BUTTON.build(
+        ButtonProps::action()
+            .text("Log out")
+            .classes("govuk-button--secondary")
+            .name("action")
+            .value("logout"),
+    )
 }

@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 // The journey's LoadAnswers effect seeds any stored answers before the
 // overview renders, so a single known answer tells us the user has saved
@@ -69,28 +70,13 @@ pub fn scenarios_heading() -> Value {
 }
 
 pub fn seed_partial_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Seed partial progress",
-        "name": "action",
-        "value": "seed-partial",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::BUTTON.build(ButtonProps::action().text("Seed partial progress").classes("govuk-button--secondary").name("action").value("seed-partial"))
 }
 
 pub fn seed_complete_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Seed complete progress",
-        "name": "action",
-        "value": "seed-complete",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::BUTTON.build(ButtonProps::action().text("Seed complete progress").classes("govuk-button--secondary").name("action").value("seed-complete"))
 }
 
 pub fn clear_button() -> Value {
-    govuk::BUTTON.build(obj! {
-        "text": "Clear saved answers",
-        "name": "action",
-        "value": "clear",
-        "classes": "govuk-button--warning",
-    })
+    govuk::BUTTON.build(ButtonProps::action().text("Clear saved answers").classes("govuk-button--warning").name("action").value("clear"))
 }

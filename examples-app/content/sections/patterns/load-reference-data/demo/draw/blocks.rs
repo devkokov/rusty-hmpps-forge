@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 use forge_core::builtins::components as core_blocks;
 use crate::components::lottery_ball::LOTTERY_BALL;
 
@@ -47,9 +48,9 @@ pub fn bonus_ball() -> Value {
 }
 
 pub fn draw_again_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Draw again",
-        "href": "/forge-developer-guide/patterns/demos/load-reference-data/draw",
-        "classes": "govuk-button--secondary",
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/load-reference-data/draw")
+            .text("Draw again")
+            .classes("govuk-button--secondary"),
+    )
 }

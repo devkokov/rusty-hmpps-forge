@@ -1,6 +1,7 @@
 use forge_core::authoring::*;
 use forge_core::{Value, obj};
 use forge_govuk_components::blocks as govuk;
+use forge_govuk_components::props::ButtonProps;
 
 pub fn heading() -> Value {
     govuk::HEADING.build(obj! {
@@ -33,9 +34,9 @@ pub fn shows_list() -> Value {
 }
 
 pub fn start_button() -> Value {
-    govuk::LINK_BUTTON.build(obj! {
-        "text": "Start with the verbose version",
-        "href": "/forge-developer-guide/patterns/demos/inline-functions/before",
-        "isStartButton": true,
-    })
+    govuk::LINK_BUTTON.build(
+        ButtonProps::link("/forge-developer-guide/patterns/demos/inline-functions/before")
+            .text("Start with the verbose version")
+            .start_button(true),
+    )
 }
